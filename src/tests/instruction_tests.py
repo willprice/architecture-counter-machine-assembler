@@ -1,64 +1,41 @@
 import unittest
 from src import assembler
 from src.assembler import Assembler
+from parameterizedtestcase import ParameterizedTestCase
 
-class InstructionTests(unittest.TestCase):
+class InstructionTests(ParameterizedTestCase):
     def setUp(self):
         self.assembler = Assembler()
 
-    def test_increment_r0_is_converted_to_0x0(self):
-        self.assertEqual(0x0, self.increment(0))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "register_to_increment"),
+                                        [(0x0, 0), (0x10, 1)])
+    def test_increment(self, expected_instruction, register_to_increment):
+        self.assertEqual(expected_instruction, self.increment(register_to_increment))
 
-    def test_increment_r1_is_converted_to_0x10(self):
-        self.assertEqual(0x10, self.increment(1))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "register_to_decrement"),
+                                        [(0x20, 0), (0x30, 1)])
+    def test_decrement(self, expected_instruction, register_to_decrement):
+        self.assertEqual(expected_instruction, self.decrement(register_to_decrement))
 
-    def test_decrement_r0_is_converted_to_0x20(self):
-        self.assertEqual(0x20, self.decrement(0))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "jump_address"),
+                                        [(0x40, 0), (0x41, 1), (0x4f, 15)])
+    def test_jump_not_zero(self, expected_instruction, jump_address):
+        self.assertEqual(expected_instruction, self.jump_not_zero(jump_address))
 
-    def test_decrement_r1_is_converted_to_0x30(self):
-        self.assertEqual(0x30, self.decrement(1))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "jump_address"),
+                                        [(0x60, 0), (0x61, 1), (0x6f, 15)])
+    def test_jump_negative(self, expected_instruction, jump_address):
+        self.assertEqual(expected_instruction, self.jump_if_negative(jump_address))
 
-    def test_jnz_to_address_0_is_converted_to_0x40(self):
-        self.assertEqual(0x40, self.jump_not_zero(0))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "register", "address"),
+                                        [(0x80, 0, 0), (0x90, 1, 0), (0x9f, 1, 15)])
+    def test_store_from_register(self, expected_instruction, register, address):
+        self.assertEqual(expected_instruction, self.store(register, address))
 
-    def test_jnz_to_address_1_is_converted_to_0x41(self):
-        self.assertEqual(0x41, self.jump_not_zero(1))
-
-    def test_jnz_to_address_15_is_converted_to_0x4f(self):
-        self.assertEqual(0x4f, self.jump_not_zero(0xf))
-
-    def test_jneg_to_address_0_is_converted_to_0x60(self):
-        self.assertEqual(0x60, self.jump_if_negative(0))
-
-    def test_jneg_to_address_1_is_converted_to_0x61(self):
-        self.assertEqual(0x61, self.jump_if_negative(1))
-
-    def test_jneg_to_address_15_is_converted_to_0x6f(self):
-        self.assertEqual(0x6f, self.jump_if_negative(15))
-
-    def test_str_r0_to_address_0_is_converted_to_0x80(self):
-        self.assertEqual(0x80, self.store(0, 0))
-
-    def test_str_r1_to_address_0_is_converted_to_0x90(self):
-        self.assertEqual(0x90, self.store(1, 0))
-
-    def test_str_r0_to_address_1_is_converted_to_0x81(self):
-        self.assertEqual(0x81, self.store(0, 1))
-
-    def test_str_r1_to_address_15_is_converted_to_0x9f(self):
-        self.assertEqual(0x9f, self.store(1, 15))
-
-    def test_ldr_r0_to_address_0_is_converted_to_0xa0(self):
-        self.assertEqual(0xa0, self.load(0, 0))
-
-    def test_ldr_r1_to_address_0_is_converted_to_0xb0(self):
-        self.assertEqual(0xb0, self.load(1, 0))
-
-    def test_ldr_r0_to_address_1_is_converted_to_0xa1(self):
-        self.assertEqual(0xa1, self.load(0, 1))
-
-    def test_ldr_r1_to_address_15_is_converted_to_0xbf(self):
-        self.assertEqual(0xbf, self.load(1, 15))
+    @ParameterizedTestCase.parameterize(("expected_instruction", "register", "address"),
+                                        [(0xa0, 0, 0), (0xb0, 1, 0), (0xa1, 0, 1), (0xbf, 1, 15)])
+    def test_load_to_register(self, expected_instruction, register, address):
+        self.assertEqual(expected_instruction, self.load(register, address))
 
     def load(self, register, address):
         return self.assembler.ldr(register, address)
