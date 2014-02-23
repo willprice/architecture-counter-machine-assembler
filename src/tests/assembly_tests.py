@@ -19,3 +19,14 @@ class AssemblyTests(ParameterizedTestCase):
     def test_instruction_conversion(self, expected_output, input):
         assembler = Assembler()
         self.assertEqual(expected_output, assembler.convert_mnemonic_into_instruction(input))
+
+    @ParameterizedTestCase.parameterize(("expected_output", "line"),
+                                        [
+                                            (["INC", "1"], "INC 1"),
+                                            (["INC", "0"], "INC 0"),
+                                            (["INC", "1"], "INC 1 ; this is a comment"),
+                                            (["INC", "1"], "  INC 1"),
+                                         ])
+    def test_split_instruction_line(self, expected_output, line):
+        assembler = Assembler()
+        self.assertEqual(expected_output, assembler.break_line(line))

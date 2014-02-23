@@ -34,3 +34,14 @@ class Assembler(object):
         instruction_function = self.instruction_conversions[instruction]
         operands = self.convert_from_string_to_int(operands)
         return instruction_function(*operands)
+
+    def break_line(self, line):
+        line = self.remove_comments(line)
+        line = self.remove_leading_and_trailing_whitespace(line)
+        return line.split(" ")
+
+    def remove_comments(self, line):
+        return line.partition(";")[0]
+
+    def remove_leading_and_trailing_whitespace(self, line):
+        return line.strip(" ")
