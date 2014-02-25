@@ -2,8 +2,16 @@ import unittest
 from src.assembler import Assembler
 from parameterizedtestcase import ParameterizedTestCase
 
+def label_table_test_cases():
+    return [(0, "one",
+                """:one
+                INC r1"""),
+            ]
 
 class AssemblyTests(ParameterizedTestCase):
+    def setUp(self):
+        self.assembler = Assembler()
+
     @ParameterizedTestCase.parameterize(
         ("expected_output", "input"),
         [
@@ -17,16 +25,5 @@ class AssemblyTests(ParameterizedTestCase):
         ]
     )
     def test_instruction_conversion(self, expected_output, input):
-        assembler = Assembler()
-        self.assertEqual(expected_output, assembler.convert_mnemonic_into_instruction(input))
+        self.assertEqual(expected_output, self.assembler.convert_mnemonic_into_instruction(input))
 
-    @ParameterizedTestCase.parameterize(("expected_output", "line"),
-                                        [
-                                            (["INC", "1"], "INC 1"),
-                                            (["INC", "0"], "INC 0"),
-                                            (["INC", "1"], "INC 1 ; this is a comment"),
-                                            (["INC", "1"], "  INC 1"),
-                                         ])
-    def test_split_instruction_line(self, expected_output, line):
-        assembler = Assembler()
-        self.assertEqual(expected_output, assembler.break_line(line))
